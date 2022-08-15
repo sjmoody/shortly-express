@@ -3,9 +3,14 @@ const createTables = require('./config');
 const Promise = require('bluebird');
 const database = 'shortly';
 
+// const connection = mysql.createConnection({
+//   user: 'student',
+//   password: 'student'
+// });
+
 const connection = mysql.createConnection({
-  user: 'student',
-  password: 'student'
+  user: 'root',
+  password: ''
 });
 
 const db = Promise.promisifyAll(connection, { multiArgs: true });
