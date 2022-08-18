@@ -8,7 +8,7 @@ const parseCookies = (req, res, next) => {
   }
 
   req.cookies = cookiesObj;
-  // req.session.cookies = cookies;
+
   return next();
 
 };

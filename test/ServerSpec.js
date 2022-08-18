@@ -378,6 +378,7 @@ describe('', function() {
 
         createSession(requestWithoutCookies, response, function() {
           var session = requestWithoutCookies.session;
+
           expect(session).to.exist;
           expect(session).to.be.an('object');
           expect(session.hash).to.exist;
@@ -392,7 +393,9 @@ describe('', function() {
         createSession(requestWithoutCookie, response, function() {
           var cookies = response.cookies;
           expect(cookies['shortlyid']).to.exist;
+
           expect(cookies['shortlyid'].value).to.exist;
+
           done();
         });
       });
@@ -454,6 +457,8 @@ describe('', function() {
 
               createSession(requestWithCookies, secondResponse, function() {
                 var session = requestWithCookies.session;
+
+                // looks like an async issue
                 expect(session).to.be.an('object');
                 expect(session.user.username).to.eq(username);
                 expect(session.userId).to.eq(userId);

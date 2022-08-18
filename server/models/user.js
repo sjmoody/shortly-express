@@ -32,6 +32,17 @@ class Users extends Model {
     return super.get.call(this, user);
   }
 
+
+  /**
+   *
+   * @param {*} userId
+   * @returns
+   */
+  getFromId(userId) {
+    let id = {userId};
+    return super.get.call(this, id);
+  }
+
   /**
    * Creates a new user record with the given username and password.
    * This method creates a salt and hashes the password before storing
