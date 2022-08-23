@@ -1,6 +1,8 @@
+
 const parseCookies = (req, res, next) => {
 
   let cookiesObj = {};
+
   if (typeof req.headers.cookie === 'string') {
     let cookies = req.headers.cookie.split('; ')
       .map(v => v.split('='));
@@ -9,7 +11,7 @@ const parseCookies = (req, res, next) => {
 
   req.cookies = cookiesObj;
 
-  return next();
+  next();
 
 };
 

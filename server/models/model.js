@@ -51,8 +51,10 @@ class Model {
    * the conditions provided, only one will be provided upon fulfillment.
    */
   get(options) {
+    // console.log("in get model. Options: ", options);
     let parsedOptions = parseData(options);
     let queryString = `SELECT * FROM ${this.tablename} WHERE ${parsedOptions.string.join(' AND ')} LIMIT 1`;
+    // console.log("executing query: ", queryString);
     return executeQuery(queryString, parsedOptions.values).then(results => results[0]);
   }
 
@@ -82,6 +84,7 @@ class Model {
    * during the query.
    */
   update(options, values) {
+
     let parsedOptions = parseData(options);
     let queryString = `UPDATE ${this.tablename} SET ? WHERE ${parsedOptions.string.join(' AND ')}`;
     return executeQuery(queryString, Array.prototype.concat(values, parsedOptions.values));

@@ -4,7 +4,7 @@ const utils = require('./lib/hashUtils');
 const partials = require('express-partials');
 const Auth = require('./middleware/auth');
 const models = require('./models');
-
+const parseCookies = require('./middleware/cookieParser');
 const app = express();
 
 app.set('views', `${__dirname}/views`);
@@ -14,19 +14,21 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
 
+app.use(parseCookies);
+app.use(Auth.createSession);
 
 
-app.get('/',
+app.get('/', Auth.verifySession,
   (req, res) => {
     res.render('index');
   });
 
-app.get('/create',
+app.get('/create', Auth.verifySession,
   (req, res) => {
     res.render('index');
   });
 
-app.get('/links',
+app.get('/links', Auth.verifySession,
   (req, res, next) => {
     models.Links.getAll()
       .then(links => {
@@ -37,7 +39,7 @@ app.get('/links',
       });
   });
 
-app.post('/links',
+app.post('/links', Auth.verifySession,
   (req, res, next) => {
     var url = req.body.url;
     if (!models.Links.isValidUrl(url)) {
@@ -76,40 +78,80 @@ app.post('/links',
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
+app.get('/login', (req, res) => {
+  res.render('login');
+});
+
+app.get('/logout', (req, res, next) => {
+
+  return models.Sessions.delete({ hash: req.cookies.shortlyid })
+    .then(() => {
+      res.clearCookie('shortlyid');
+      res.redirect('/login');
+    })
+    .error(error => {
+      res.status(500).send(error);
+    });
+
+});
+
+app.get('/signup', (req, res) => {
+  res.render('signup');
+
+});
+
 app.post('/login',
   (req, res, next) => {
-    models.Users.get(req.body.username)
+    var username = req.body.username;
+    var password = req.body.password;
+    // find user by username
+    models.Users.get({username})
       .then(user => {
-        if (user === undefined) {
-          res.redirect('/login');
+        if (!user || !models.Users.compare(password, user.password, user.salt)) {
+          throw user;
         }
-        let test = models.Users.compare(req.body.password, user.password, user.salt);
-
-        if (test === true) {
-          res.redirect('/');
-        } else {
-          res.redirect('/login');
-        }
-      }).error(error => {
-        res.redirect('/');
-      });
-
-  });
-
-app.use('/signup',
-  (req, res, next) => {
-  // TODO: call the model function to create user
-    models.Users.create({username: req.body.username, password: req.body.password})
-      .then((data) => {
-        res.redirect('/');
-        // res.sendStatus(201);
+        return models.Sessions.update({id: req.session.id}, {userId: user.id});
       })
-      .error(error => {
-        res.redirect('/signup');
-        // console.log("error: ", error);
-        // res.status(500).send(error);
+      .then(() => {
+        res.redirect('/');
+      })
+      .catch((err) => {
+        console.log(err);
+        res.redirect('/login');
       });
+
+
   });
+
+app.post('/signup', (req, res, next) => {
+  var username = req.body.username;
+  var password = req.body.password;
+  // check for user
+  models.Users.get({username})
+    .then(user => {
+      if (user) {
+        // console.log("user already exists");
+        throw (user);
+      }
+      // create user
+      return models.Users.create({username, password});
+    })
+    .then(results => {
+      return models.Sessions.update({id: req.session.id}, {userId: results.insertId});
+    })
+    .then(user => {
+      // console.log("user from update session:");
+      res.redirect('/');
+    })
+    // .error((error) => {
+    //   console.log(`Error in app: ${error}`);
+    // })
+    .catch((user) => {
+      res.redirect('/signup');
+    });
+});
+
+
 
 
 /************************************************************/

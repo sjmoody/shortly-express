@@ -23,25 +23,26 @@ class Users extends Model {
     return utils.compareHash(attempted, password, salt);
   }
 
-  /**
-   *
-   * @param {*} username - the user's username
-   */
-  get(username) {
-    let user = {username};
-    return super.get.call(this, user);
-  }
+  // /**
+  //  *
+  //  * @param {*} username - the user's username
+  //  */
+  // get(username) {
+  //   let user = {username};
+  //   return super.get.call(this, user);
+  // }
 
 
-  /**
-   *
-   * @param {*} userId
-   * @returns
-   */
-  getFromId(userId) {
-    let id = {userId};
-    return super.get.call(this, id);
-  }
+  // /**
+  //  *
+  //  * @param {*} userId
+  //  * @returns
+  //  */
+  // getFromId(userId) {
+  //   // console.log("calling getFromId. userId: ", userId);
+  //   let id = {id: userId};
+  //   return super.get.call(this, id);
+  // }
 
   /**
    * Creates a new user record with the given username and password.
